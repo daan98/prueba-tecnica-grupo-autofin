@@ -1,4 +1,4 @@
-export interface SaleDetail {
+export interface SaleDetailInterface {
     id            : number;
     saleId        : number;
     priductId     : number;
