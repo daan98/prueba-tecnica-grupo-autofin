@@ -1,1 +1,43 @@
-<p>dashborad-layout works!</p>
+<div class="p-2 px-3 bg-primary-100 h-7rem flex align-items-center">
+    <!-- Header -->
+    <p-sidebar [visible]="this.sideBarVisible()" (onHide)="showHideSideBar(false)" position="left" class="min-h-full">
+        <ng-template pTemplate="header" class="min-h-full">
+            <h3>Menú</h3>
+        </ng-template>
+
+        <ng-template pTemplate="content">
+            <p-panelMenu [model]="itemsMenu" [style]="{'width':'300px'}"></p-panelMenu>
+        </ng-template>
+
+        <ng-template pTemplate="footer">
+            <div class="flex align-items-center justify-content-start gap-2">
+                <h6>Desarrollado por Daniel Agüero</h6>
+                <i class="pi pi-desktop" style="font-size: 1rem; color: var(--primary-color);"></i>
+            </div>
+        </ng-template>
+    </p-sidebar>
+
+    <p-button 
+        type="button"
+        class="border-circle"
+        (onClick)="showHideSideBar(true)"
+        icon="pi pi-arrow-right"
+        [rounded]="true"
+        [raised]="true"
+        size="large"
+        pTooltip="Abrir menú"
+    >
+    </p-button>
+</div>
+
+<!-- Body -->
+<div class="body-container px-3 py-4">
+    <router-outlet></router-outlet>
+</div>
+
+<footer class="px-3 p-2 bg-primary flex gap-2 justify-content-between align-items-center">
+    <i class="pi pi-desktop" style="font-size: 3rem; color: white;"></i>
+
+    <p class="text-center">Desarrollado por Daniel Antonio Agüero</p>
+    <!-- <p-tabMenu class="flex" [model]="footerMenuItems"></p-tabMenu> -->
+</footer>

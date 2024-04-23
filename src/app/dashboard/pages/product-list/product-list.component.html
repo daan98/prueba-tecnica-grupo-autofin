@@ -1,1 +1,24 @@
-<p>product-list works!</p>
+<p-table [value]="products()"  [tableStyle]="{'min-width': '200px'}">
+    <ng-template pTemplate="header">
+        <tr>
+            @for (field of keys; track $index) {
+                @if (field != "id") {
+                    <th> {{ field }} </th>
+                }
+            }
+            <th>Acciones</th>
+        </tr>
+    </ng-template>
+
+    <ng-template pTemplate="body" let-pdt>
+        <tr>
+            <td>{{ pdt.nombre }}</td>
+            <td>{{ pdt.descripcion }}</td>
+            <td>{{ pdt.precio | currency: 'MXN' : 'symbol' : '1.2-2' }}</td>
+            <td>
+                <p-button icon="pi pi-pencil" pTooltip="Editar" tooltipPosition="bottom"  showDelay="700" severity="info" (onClick)="editProduct(pdt)">
+                </p-button>
+            </td>
+        </tr>
+    </ng-template>
+</p-table>

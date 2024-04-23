@@ -1,16 +1,14 @@
-import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterOutlet } from '@angular/router';
-import { PrimeNgModule } from './prime-ng/prime-ng.module';
+import { Component, OnInit } from '@angular/core';
 import { PrimeNGConfig } from 'primeng/api';
+import { PrimeNgModule } from './prime-ng/prime-ng.module';
 
 @Component({
   selector: 'app-root',
   standalone: true,
   imports: [
     CommonModule,
-    RouterOutlet,
-    PrimeNgModule
+    PrimeNgModule,
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'

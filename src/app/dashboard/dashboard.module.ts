@@ -1,14 +1,15 @@
 import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
 
 import { DashboardRoutingModule } from './dashboard-routing.module';
+import { PrimeNgModule } from '../prime-ng/prime-ng.module';
+import { DashboradLayoutComponent } from './pages/dashborad-layout/dashborad-layout.component';
 
 
 @NgModule({
   declarations: [],
   imports: [
-    CommonModule,
-    DashboardRoutingModule
+    DashboardRoutingModule,
+    PrimeNgModule,
   ]
 })
 export class DashboardModule { }
