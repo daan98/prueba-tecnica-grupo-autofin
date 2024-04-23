@@ -1,1 +1,84 @@
-<p>new-product works!</p>
+<h1 class="text-center">
+    {{ currentProductId ? 'Editar' : 'Agregar' }} producto
+</h1>
+
+<form
+    (ngSubmit)="currentProductId ? updateProduct() : createProduct()"
+    [formGroup]="productForm"
+    class="w-10 flex flex-column justify-content-center gap-5 m-auto"
+>
+    <div class="flex flex-column gap-3">
+        <label for="nombre">Nombre</label>
+        <input 
+            type="text"
+            pInputText
+            placeholder="Nombre"
+            id="nombre"
+            aria-describedby="ayuda-nombre"
+            formControlName="nombre"
+            class="border-round-sm"
+            [class]="productForm.get('nombre')?.value == '' ? 'ng-invalid ng-dirty' : ''"
+        />
+        <small id="ayuda-nombre">Nombre del producto</small>
+    </div>
+
+    <div class="flex flex-column gap-3">
+        <label for="descripcion">Descripción</label>
+        <input 
+            type="text"
+            pInputText
+            placeholder="Descripcion"
+            id="descripcion"
+            aria-describedby="ayuda-descripcion"
+            formControlName="descripcion"
+            class="border-round-sm"
+            [class]="productForm.get('descripcion')?.value == '' ? 'ng-invalid ng-dirty' : ''"
+        />
+        <small id="ayuda-descripcion">Descripción del producto</small>
+    </div>
+
+    <div class="flex flex-column gap-3">
+        <label for="precio">Precio</label>
+        <p-inputNumber
+            inputId="currency-mexico"
+            mode="currency"
+            currency="MXN"
+            locale="es-MX"
+            [showButtons]="true"
+            formControlName="precio"
+            id="precio"
+            placeholder="Precio"
+            aria-describedby="ayuda-precio"
+            class="border-round-sm"
+            [class]="productForm.get('precio')?.value <= 0 ? 'ng-invalid ng-dirty' : ''"
+        >
+        </p-inputNumber>
+        <small id="ayuda-precio">Precio del producto</small>
+    </div>
+
+    <div class="flex justify-content-center gap-4">
+        <p-toast [showTransformOptions]="'translateX(100%)'" [showTransitionOptions]="'1000ms'" [hideTransitionOptions]="'1000ms'" [showTransformOptions]="'translateX(-100%)'"></p-toast>
+        <p-button
+            [icon]="currentProductId ? 'pi pi-file-edit' : 'pi pi-save'"
+            [pTooltip]="currentProductId ? 'Actualizar' : 'Crear'"
+            tooltipPosition="left"
+            showDelay="700"
+            [severity]="currentProductId ? 'info' : 'success'"
+            (onClick)="currentProductId ? updateProduct() : createProduct()"
+            [label]="currentProductId ? 'Actualizar' : 'Crear'"
+        >
+        </p-button>
+
+        @if (currentProductId) {
+            <p-button
+                icon="pi pi-trash"
+                pTooltip="Eliminar"
+                showDelay="700"
+                severity="danger"
+                (onClick)="deleteProduct()"
+                label="Eliminar"
+            >
+            </p-button>
+        }
+    </div>
+</form>

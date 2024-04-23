@@ -29,7 +29,7 @@ export class DashboardService {
   }
 
   public updateProduct(id : number, product : ProductInterface) : Observable<ProductInterface[]> {
-    return this.http.put<ProductInterface[]>(`${this.baseUrl}${AppBackUrlEnum.products}/${id}`, product);
+    return this.http.put<ProductInterface[]>(`${this.baseUrl}${AppBackUrlEnum.products}`, product);
   }
 
   public deleteProduct(id: number) : Observable<ProductInterface[]> {

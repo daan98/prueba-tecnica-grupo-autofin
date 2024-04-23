@@ -18,12 +18,12 @@ import { DashboardService } from '../../services/dashboard.service';
 })
 export class ProductListComponent implements OnInit {
 
-  private dashboardService                         = inject( DashboardService );
-  private router                                   = inject( Router );
-  public  isLoading                                = signal<boolean>(false);
-  public  products                                 = signal<ProductInterface[]>([]);
-  public  keys                 : Array<string>     = [];
-  public  messsage             : string            = "";
+  private dashboardService                             = inject( DashboardService );
+  private router                                       = inject( Router );
+  public  isLoading                                    = signal<boolean>(false);
+  public  products                                     = signal<ProductInterface[]>([]);
+  public  keys                 : Array<string>         = [];
+  public  messsage             : string                = "";
 
   ngOnInit(): void {
     this.retriveAllProducts();
