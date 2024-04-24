@@ -1,12 +1,13 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
-import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MessageService } from 'primeng/api';
 import { Router } from '@angular/router';
 
 // Archivos creados manualmente
-import { ClientInterface, SaleDetailInterface, SaleInterface } from '../../interfaces';
+import { ClientInterface, ProductInterface, SaleDetailInterface, SaleInterface, SingleSaleDetailInterface } from '../../interfaces';
 import { DashboardService } from '../../services/dashboard.service';
 import { PrimeNgModule } from '../../../prime-ng/prime-ng.module';
+import { DecimalPipe } from '@angular/common';
 
 @Component({
   selector: 'app-new-sale',
@@ -14,6 +15,7 @@ import { PrimeNgModule } from '../../../prime-ng/prime-ng.module';
   imports: [
     PrimeNgModule,
     ReactiveFormsModule,
+    DecimalPipe,
   ],
   templateUrl: './new-sale.component.html',
   styles: ``,
@@ -25,13 +27,15 @@ export class NewSaleComponent implements OnInit{
   private router                                   = inject( Router );
   private messageService                           = inject( MessageService );
   public  isLoading                                = signal<boolean>( false )
-  public  sale                                     = signal<SaleInterface>( {id: 0, clientId: 0, total: 0} );/* REVISAR UTILIDAD */
-  public  saleDetail                               = signal<SaleDetailInterface>({ id: 0, saleId: 0,productId: 0, price: 0, quantity: 0, total: 0 });/* REVISAR UTILIDAD */
+  public  sales                                    = signal<SaleInterface[]>([]);/* REVISAR UTILIDAD */
+  public  saleDetails                              = signal<SaleDetailInterface[]>([]);/* REVISAR UTILIDAD */
   public  clients                                  = signal<ClientInterface[]>([]);
+  public  products                                 = signal<ProductInterface[]>([]);
+  public  singleSalesDetails                       = signal<SingleSaleDetailInterface[]>([]);
+  public  totalSale : number                       = 0;
   public  keys                 : Array<string>     = [];
   public  currentSaleId        : number            = 0;
-  public  actualRoute          : string            = '';
-  public  saleForm             : FormGroup         = new FormGroup({
+  /* public  saleForm             : FormGroup         = new FormGroup({
     id: new FormControl<number>(0),
     total: new FormControl<number>(0),
     idClientes: new FormControl<number>(0),
@@ -43,19 +47,39 @@ export class NewSaleComponent implements OnInit{
     total:                   new FormControl<number>(0),
     idVentasEncabezado:      new FormControl<number>(0),
     idProducto:              new FormControl<number>(0)
+  }); */
+  /* CAMPOS PARA FORMULARIO:
+  * Cliente
+  * Producto
+  * Cantidad
+  * Precio unitario (deshabilitado se pondra valor desde código)
+  * Total (deshabilitado se pondra valor desde código)
+   */
+  public myForm : FormGroup = new FormGroup({
+    cliente: new FormControl(null, [ Validators.required ]), // {id: 0, nombre: ''}
+    producto: new FormControl(null, [ Validators.required ]), // {id: 0, nombre: '', descripcion: '', precio: 0}
+    cantidad: new FormControl(null, [ Validators.required ]),
+    precio: new FormControl(null, [ Validators.required ]),
+    total: new FormControl(null, [ Validators.required ])
   });
 
+
   ngOnInit(): void {
-    this.checkRoute();
-    this.retrieveClients();
+    /* console.log("is form valid: ", this.myForm); */
+    if (this.checkRoute() == "/dashboard/new-sale") {
+      this.myForm.controls['precio'].disable();
+      this.myForm.controls['total'].disable();
+      this.retriveAllClients();
+      this.retriveAllProducts();
+      return;
+    }
 
-
-    this.retrieveSingleClient()
-    this.retrieveSingleSale();
-    this.retrieveSingleProduct()
+    this.retriveSingleClient()
+    this.retriveSingleSale();
+    this.retriveSingleProduct()
   }
 
-  private retrieveClients() : void {
+  private retriveAllClients() : void {
     this.isLoading.set(true);
 
     this.dashboardService.getAllClients().subscribe({
@@ -78,17 +102,92 @@ export class NewSaleComponent implements OnInit{
     })
   }
 
-  public createSale() : void {}
+  private retriveSingleClient() : void {}
+  
+  private retriveAllProducts() : void {
+    this.isLoading.set(true);
 
-  private retrieveSingleClient() : void {}
+    this.dashboardService.getAllProducts().subscribe({
+      next: (productList : ProductInterface[]) => {
+        if(productList.length > 0) {
+          this.products.update(value => productList);
+          this.keys = Object.keys(this.products()[0]);
+          this.isLoading.set(false);
+          return;
+        }
 
-  private retrieveSingleSale() : void {}
-
-  private retrieveSingleProduct() : void {}
-
-  private checkRoute() : void {
-    this.actualRoute = this.router.url;
+        this.isLoading.set( false );
+        /* this.messsage = "No hay productos. Empiece agreguando algunos." */
+      },
+      error: (err : any) => {
+        console.log("Error al intentar obtener productos: ", err);
+        /* this.messsage = "Hubo un error. Vuelva a intentarlo." */
+        this.products.set([]);
+        this.isLoading.set(false);
+      }
+    })
   }
+
+  private retriveSingleSale() : void {}
+  
+  private retriveSingleProduct() : void {}
+  
+  public createSale() : void {
+    /* console.log('myForm: ', this.myForm); */
+  }
+
+  public addSale() : void {
+    /* 
+    * producto : ProductInterface,
+    * cantidad : number,
+    * precio   : number,
+    * total    : number
+     */
+
+    let singleSalesDetailBody : SingleSaleDetailInterface = {
+      producto: this.myForm.get('producto')?.value,
+      cantidad: this.myForm.get('cantidad')?.value,
+      precio: this.myForm.get('precio')?.value,
+      total: this.myForm.get('total')?.value,
+    };
+
+    this.singleSalesDetails().push(singleSalesDetailBody);
+
+    this.singleSalesDetails().forEach(sale => {
+      this.totalSale += sale.total;
+    });
+    /* console.log("singleSalesDetails: ", this.singleSalesDetails()); */
+  }
+
+  public createSaleDetail() : void {}
+
+  public checkRoute() : string {
+    return this.router.url;
+  }
+
+  public selectedClient() : void {
+    this.myForm.controls['cliente'].disable();
+  }
+
+  public selectedProduct() {
+    this.myForm.get('precio')?.patchValue(this.myForm.value.producto.precio);
+    /* this.myForm.value.precio = this.myForm.value.producto.precio; */
+    this.myForm.get('cantidad')?.patchValue(null)
+    this.myForm.get('total')?.patchValue(null)
+    /* console.log('this.myForm: ', this.myForm); */
+  }
+
+  public getTotal() : void {
+    /* console.log('getTotal'); */
+    if (this.myForm.get("producto")?.value.precio && this.myForm.get("cantidad")?.value) {
+      let total : number = this.myForm.value.producto.precio * this.myForm.value.cantidad;
+      this.myForm.get('total')?.patchValue(total);
+      return;
+    }
+
+    this.myForm.get('total')?.patchValue(0);
+  }
+
   private setToastMessage(severity: "error" | "info" | "success" | "warn", summary : string, detail  : string) : void {
     this.messageService.add({
       severity,

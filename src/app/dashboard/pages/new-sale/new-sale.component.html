@@ -4,23 +4,92 @@
 
 <form
     (ngSubmit)="createSale()"
-    [formGroup]="saleForm"
+    [formGroup]="myForm"
     class="w-10 flex flex-column justify-content-center gap-5 m-auto"
 >
+    <div class="flex gap-3">
+        <div class="flex flex-column gap-3">
+            <label for="cliente">Cliente</label>
+            <p-dropdown
+                formControlName="cliente"
+                id="cliente"
+                [options]="clients()"
+                [filter]="true"
+                filterBy="nombre"
+                optionLabel="nombre"
+                placeholder="Seleccione el cliente"
+                [virtualScroll]="true"
+                [virtualScrollItemSize]="38"
+                [disabled]="isLoading()"
+                (onChange)="selectedClient()"
+                
+            >
+                <ng-template pTemplate="clients()" let-option>
+                    {{ option.nombre }}
+                </ng-template>
+            </p-dropdown>
+            <small id="ayuda-cliente">Seleccione el cliente</small>
+        </div>
+
+        <div class="flex flex-column gap-3">
+            <label for="producto">Producto</label>
+            <p-dropdown
+                formControlName="producto"
+                id="producto"
+                [options]="products()"
+                [filter]="true"
+                filterBy="nombre"
+                optionLabel="nombre"
+                placeholder="Seleccione el producto"
+                [virtualScroll]="true"
+                [virtualScrollItemSize]="38"
+                [disabled]="isLoading()"
+                (onClick)="selectedProduct()"
+                >
+                <ng-template pTemplate="item" let-option>
+                    {{ option.nombre }}
+                </ng-template>
+            </p-dropdown>
+            <small id="ayuda-producto">Seleccione el producto</small>
+        </div>
+    </div>
+
     <div class="flex flex-column gap-3">
-        <label for="cliente">Descripción</label>
-        <input 
-            type="text"
-            pInputText
-            placeholder="Cliente"
-            id="cliente"
-            aria-describedby="ayuda-cliente"
-            formControlName="cliente"
+        <label for="cantidad">Cantidad</label>
+        <p-inputNumber
+            inputId="integeronly"
+            [showButtons]="true"
+            formControlName="cantidad"
+            id="cantidad"
+            placeholder="Cantidad"
+            aria-describedby="ayuda-cantidad"
             class="border-round-sm"
-            [class]="saleForm.get('idClientes')?.value == '' ? 'ng-invalid ng-dirty' : ''"
-            [disabled]="isLoading()"
-        />
-        <small id="ayuda-cliente">Cliente...</small>
+            [class]="myForm.get('cantidad')?.value <= 0 ? 'ng-invalid ng-dirty' : ''"
+            [disabled]="true"
+            (onBlur)="getTotal()"
+        >
+        </p-inputNumber>
+        <small id="ayuda-cantidad">Número de unidades del producto</small>
+    </div>
+
+    <div class="flex flex-column gap-3">
+        <label for="precio">Precio</label>
+        <p-inputNumber
+            inputId="currency-mexico"
+            mode="currency"
+            currency="MXN"
+            locale="es-MX"
+            [showButtons]="true"
+            formControlName="precio"
+            id="precio"
+            placeholder="Precio"
+            aria-describedby="ayuda-precio"
+            class="border-round-sm"
+            [class]="myForm.get('precio')?.value <= 0 ? 'ng-invalid ng-dirty' : ''"
+            [disabled]="true"
+        >
+        </p-inputNumber>
+        <small id="ayuda-precio">Precio unitario del producto</small>
     </div>
 
     <div class="flex flex-column gap-3">
@@ -36,14 +105,14 @@
             placeholder="Total"
             aria-describedby="ayuda-total"
             class="border-round-sm"
-            [class]="saleForm.get('total')?.value <= 0 ? 'ng-invalid ng-dirty' : ''"
-            [disabled]="isLoading()"
+            [class]="myForm.get('total')?.value <= 0 ? 'ng-invalid ng-dirty' : ''"
+            [disabled]="true"
         >
         </p-inputNumber>
-        <small id="ayuda-total">Total...</small>
+        <small id="ayuda-total">Total del producto</small>
     </div>
 
-    @if (actualRoute == "/dashboard/new-sale") {
+    @if (checkRoute() == "/dashboard/new-sale") {
         <div class="flex justify-content-center gap-4">
             <p-toast
                 [showTransformOptions]="'translateX(100%)'"
@@ -65,20 +134,59 @@
                 loadingIcon="pi pi-arrow-left"
             >
             </p-button>
-    
+
             <p-button
-                icon="pi pi-save"
-                pTooltip="Crear"
+                icon="pi pi-plus"
+                pTooltip="Agregar"
                 tooltipPosition="right"
                 showDelay="700"
-                severity="success"
-                (onClick)="createSale()"
-                label="Crear"
+                severity="info"
+                (onClick)="addSale()"
+                label="Agregar"
                 [loading]="isLoading()"
-                loadingIcon="pi pi-refresh"
-                [disabled]="isLoading()"
+                loadingIcon="pi pi-plus"
+                [disabled]="!myForm.valid"
             >
             </p-button>
         </div>
     }
 </form>
+
+<div class="flex gap-3 flex-wrap justify-content-center py-3">
+    @for (saleAdded of singleSalesDetails(); track $index) {
+        <p-card header="Detalle Venta" [style]="{ width: '360px' }">
+            <p><strong>Producto: </strong>{{ saleAdded.producto.nombre }}</p>
+            <p><strong>Cantidad: </strong>{{ saleAdded.cantidad }}</p>
+            <p><strong>Precio: </strong>{{ saleAdded.precio | number: "1.2-2" }}</p>
+            <p><strong>Total: </strong>{{ saleAdded.total | number: "1.2-2" }}</p>
+        </p-card>
+    }
+</div>
+
+@if (singleSalesDetails().length > 0) {
+    <p class="pb-3 text-center"><strong>Total de la venta:</strong> {{ totalSale | number: "1.2-2" }}</p>
+
+    <div class="flex justify-content-center gap-4">
+        <p-toast
+            [showTransformOptions]="'translateX(100%)'"
+            [showTransitionOptions]="'1000ms'"
+            [hideTransitionOptions]="'1000ms'"
+            [showTransformOptions]="'translateX(-100%)'"
+        >
+        </p-toast>
+    
+        <p-button
+            icon="pi pi-save"
+            pTooltip="Registrar"
+            tooltipPosition="bottom"
+            showDelay="700"
+            severity="success"
+            (onClick)="createSale()"
+            label="Registrar"
+            [loading]="isLoading()"
+            loadingIcon="pi pi-refresh"
+            [disabled]="isLoading()"
+        >
+        </p-button>
+    </div>
+}
