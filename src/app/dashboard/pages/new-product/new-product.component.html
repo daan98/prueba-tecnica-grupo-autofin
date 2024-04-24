@@ -18,6 +18,7 @@
             formControlName="nombre"
             class="border-round-sm"
             [class]="productForm.get('nombre')?.value == '' ? 'ng-invalid ng-dirty' : ''"
+            [disabled]="isLoading()"
         />
         <small id="ayuda-nombre">Nombre del producto</small>
     </div>
@@ -33,6 +34,7 @@
             formControlName="descripcion"
             class="border-round-sm"
             [class]="productForm.get('descripcion')?.value == '' ? 'ng-invalid ng-dirty' : ''"
+            [disabled]="isLoading()"
         />
         <small id="ayuda-descripcion">Descripción del producto</small>
     </div>
@@ -51,21 +53,44 @@
             aria-describedby="ayuda-precio"
             class="border-round-sm"
             [class]="productForm.get('precio')?.value <= 0 ? 'ng-invalid ng-dirty' : ''"
+            [disabled]="isLoading()"
         >
         </p-inputNumber>
         <small id="ayuda-precio">Precio del producto</small>
     </div>
 
     <div class="flex justify-content-center gap-4">
-        <p-toast [showTransformOptions]="'translateX(100%)'" [showTransitionOptions]="'1000ms'" [hideTransitionOptions]="'1000ms'" [showTransformOptions]="'translateX(-100%)'"></p-toast>
+        <p-toast
+            [showTransformOptions]="'translateX(100%)'"
+            [showTransitionOptions]="'1000ms'"
+            [hideTransitionOptions]="'1000ms'"
+            [showTransformOptions]="'translateX(-100%)'"
+        >
+        </p-toast>
+        
+        <p-button
+            icon="pi pi-arrow-left"
+            pTooltip="Volver"
+            tooltipPosition="left"
+            showDelay="700"
+            severity="secondary"
+            routerLink="/dashboard/products"
+            label="Productos"
+            [loading]="isLoading()"
+            loadingIcon="pi pi-arrow-left"
+        >
+        </p-button>
+
         <p-button
             [icon]="currentProductId ? 'pi pi-file-edit' : 'pi pi-save'"
             [pTooltip]="currentProductId ? 'Actualizar' : 'Crear'"
-            tooltipPosition="left"
+            [tooltipPosition]="currentProductId ? 'top' :'right'"
             showDelay="700"
             [severity]="currentProductId ? 'info' : 'success'"
             (onClick)="currentProductId ? updateProduct() : createProduct()"
             [label]="currentProductId ? 'Actualizar' : 'Crear'"
+            [loading]="isLoading()"
+            loadingIcon="pi pi-refresh"
         >
         </p-button>
 
@@ -77,6 +102,7 @@
                 severity="danger"
                 (onClick)="deleteProduct()"
                 label="Eliminar"
+                [disabled]="isLoading()"
             >
             </p-button>
         }

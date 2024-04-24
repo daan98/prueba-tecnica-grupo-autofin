@@ -1,1 +1,84 @@
-<p>new-sale works!</p>
+<h1 class="text-center">
+    {{ currentSaleId ? 'Revisar' : 'Registrar' }} una venta
+</h1>
+
+<form
+    (ngSubmit)="createSale()"
+    [formGroup]="saleForm"
+    class="w-10 flex flex-column justify-content-center gap-5 m-auto"
+>
+    <div class="flex flex-column gap-3">
+        <label for="cliente">Descripción</label>
+        <input 
+            type="text"
+            pInputText
+            placeholder="Cliente"
+            id="cliente"
+            aria-describedby="ayuda-cliente"
+            formControlName="cliente"
+            class="border-round-sm"
+            [class]="saleForm.get('idClientes')?.value == '' ? 'ng-invalid ng-dirty' : ''"
+            [disabled]="isLoading()"
+        />
+        <small id="ayuda-cliente">Cliente...</small>
+    </div>
+
+    <div class="flex flex-column gap-3">
+        <label for="total">Total</label>
+        <p-inputNumber
+            inputId="currency-mexico"
+            mode="currency"
+            currency="MXN"
+            locale="es-MX"
+            [showButtons]="true"
+            formControlName="total"
+            id="total"
+            placeholder="Total"
+            aria-describedby="ayuda-total"
+            class="border-round-sm"
+            [class]="saleForm.get('total')?.value <= 0 ? 'ng-invalid ng-dirty' : ''"
+            [disabled]="isLoading()"
+        >
+        </p-inputNumber>
+        <small id="ayuda-total">Total...</small>
+    </div>
+
+    @if (actualRoute == "/dashboard/new-sale") {
+        <div class="flex justify-content-center gap-4">
+            <p-toast
+                [showTransformOptions]="'translateX(100%)'"
+                [showTransitionOptions]="'1000ms'"
+                [hideTransitionOptions]="'1000ms'"
+                [showTransformOptions]="'translateX(-100%)'"
+            >
+            </p-toast>
+            
+            <p-button
+                icon="pi pi-arrow-left"
+                pTooltip="Volver"
+                tooltipPosition="left"
+                showDelay="700"
+                severity="secondary"
+                routerLink="/dashboard/sales-detail"
+                label="Productos"
+                [loading]="isLoading()"
+                loadingIcon="pi pi-arrow-left"
+            >
+            </p-button>
+    
+            <p-button
+                icon="pi pi-save"
+                pTooltip="Crear"
+                tooltipPosition="right"
+                showDelay="700"
+                severity="success"
+                (onClick)="createSale()"
+                label="Crear"
+                [loading]="isLoading()"
+                loadingIcon="pi pi-refresh"
+                [disabled]="isLoading()"
+            >
+            </p-button>
+        </div>
+    }
+</form>
