@@ -1,8 +1,8 @@
 export interface SaleDetailInterface {
-    id            : number;
-    saleId        : number;
-    productId     : number;
-    price         : number;
-    quantity      : number;
-    total         : number;
+    id                    ?: number;
+    idventasEncabezado     : number;
+    productId              : number;
+    precio                 : number;
+    cantidad               : number;
+    total                  : number;
 }

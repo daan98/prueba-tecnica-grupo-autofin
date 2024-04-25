@@ -134,6 +134,30 @@ export class NewSaleComponent implements OnInit{
   
   public createSale() : void {
     /* console.log('myForm: ', this.myForm); */
+    this.isLoading.set( true );
+    let saleBody : SaleInterface;
+
+    console.log("client: ", this.myForm.get('cliente'));
+    saleBody = {
+      clientId: this.myForm.get('cliente')?.value.id,
+      total: this.totalSale
+    }
+
+    this.dashboardService.createSale(saleBody).subscribe({
+      next: (saleCreated : SaleInterface[]) => {
+        if (saleCreated.length > 0) {
+          /* let saleDetailBody : SaleDetailInterface = {
+            saleId: saleCreated[saleCreated.length - 1].clientId,
+            productId: this.myForm.get('producto')?.value.id,
+
+          } */
+          let createdSaleId = saleCreated[saleCreated.length - 1].clientId;
+          this.createSaleDetail(createdSaleId);
+          return;
+        }
+      },
+      error: () => {}
+    });
   }
 
   public addSale() : void {
@@ -159,7 +183,41 @@ export class NewSaleComponent implements OnInit{
     /* console.log("singleSalesDetails: ", this.singleSalesDetails()); */
   }
 
-  public createSaleDetail() : void {}
+  public async createSaleDetail(idventasEncabezado : number) : Promise<void> {
+    this.isLoading.set( true );
+
+    let errorOnCreatingDetail = false;
+
+    this.singleSalesDetails().forEach(async saleDetail => {
+      if (errorOnCreatingDetail) {
+        return;
+      }
+      
+      let saleDetailBody : SaleDetailInterface = {
+        productId:     saleDetail.producto.id,
+        precio:        saleDetail.producto.precio,
+        cantidad:      saleDetail.cantidad,
+        total:         saleDetail.total,
+        idventasEncabezado,
+      };
+
+      await this.dashboardService.createSaleDetail(saleDetailBody).subscribe({
+        next: (saleDetailCreated : SaleDetailInterface[]) => {},
+        error: (err : any) => {
+          console.log("Hubo un error al registrar el detalle de venta: ", err);
+          this.setToastMessage("error", "Error", "No se pudo registrar el detalle de venta.");
+          errorOnCreatingDetail = true;
+          this.isLoading.set(false);
+        }
+      });
+    });
+
+    this.setToastMessage("success", "Éxito", "Todos los detalles de venta se crearon exitosamente.");
+    setTimeout(() => {
+      this.isLoading.set( false );
+      this.router.navigateByUrl('/dashboard/sales-detail');
+    }, 4500);
+  }
 
   public checkRoute() : string {
     return this.router.url;
@@ -185,7 +243,7 @@ export class NewSaleComponent implements OnInit{
       return;
     }
 
-    this.myForm.get('total')?.patchValue(0);
+    this.myForm.get('total')?.patchValue(null);
   }
 
   private setToastMessage(severity: "error" | "info" | "success" | "warn", summary : string, detail  : string) : void {
